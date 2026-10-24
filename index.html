@@ -40,6 +40,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 #text .w.cur{color:var(--yellow)}
 #text p{margin:0 0 .6em}
 .fadeB{position:absolute;left:0;right:0;bottom:0;height:24px;pointer-events:none;z-index:2;background:linear-gradient(rgba(0,0,0,0),#000)}
+#btnReset{position:absolute;right:8px;bottom:8px;z-index:4;width:32px;height:32px;border-radius:50%;background:rgba(120,120,128,.36);display:flex;align-items:center;justify-content:center}
+#btnReset svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 #marker{position:absolute;left:9px;width:4px;height:calc(var(--fs)*1.05);border-radius:2px;background:var(--yellow);z-index:3;transition:top .2s}
 
 body.portrait #prompter{left:0;right:0;top:0;height:calc(var(--st) + var(--ph));border-radius:0 0 20px 20px}
@@ -75,7 +77,8 @@ body.landscape #timer{top:14px;left:50%;transform:translateX(-50%)}
 #status{position:fixed;z-index:7;font-size:13px;font-weight:600;height:30px;padding:0 12px 0 10px;border-radius:15px;display:flex;align-items:center;gap:7px}
 #status .lv{display:flex;gap:2px;align-items:center;height:14px}
 #status .lv b{display:block;width:3px;height:4px;border-radius:2px;background:var(--label3);transition:height .08s}
-#status.live .lv b{background:var(--green)}
+#status.live .lv b{background:rgba(48,209,88,.45)}
+#status.live.talk .lv b{background:var(--green)}
 body.portrait #status{right:16px;top:calc(var(--st) + var(--ph) + 12px)}
 body.landscape #status{bottom:14px;left:50%;transform:translateX(-50%)}
 
@@ -162,6 +165,7 @@ input[type=file]{display:none}
   <div id="marker"></div>
   <div id="scroll"><div id="text"></div></div>
   <div class="fadeB"></div>
+  <button id="btnReset" aria-label="Zum Anfang"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
 </div></div>
 
 <div id="timer">00:00</div>
@@ -172,8 +176,8 @@ input[type=file]{display:none}
   <button class="round glass" id="btnText" aria-label="Skripte">
     <svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></button>
   <button id="rec" aria-label="Aufnahme"><i></i></button>
-  <button class="round glass" id="btnReset" aria-label="Zum Anfang">
-    <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+  <button class="round glass" id="btnFlip" aria-label="Kamera wechseln">
+    <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><path d="M9.5 12.5a3 3 0 0 1 5-1.5l1 1M14.5 13.5a3 3 0 0 1-5 1.5l-1-1"/><path d="M15.5 10v2h-2M8.5 16v-2h2"/></svg></button>
 </div>
 
 <div id="count"><small>Los geht’s in</small>
@@ -203,17 +207,18 @@ input[type=file]{display:none}
 
   <div class="cap">Mitlaufen</div>
   <div class="group">
-    <div class="row">Text folgt der Stimme<label class="switch"><input type="checkbox" id="optVoice" checked><span></span></label></div>
-    <div class="row">Sprache<select id="optLang"><option value="en-US">English</option><option value="de-DE">Deutsch</option></select></div>
-    <div class="row">Tempo ohne Stimme<input type="range" id="optSpeed" min="10" max="120" value="40"></div>
+    <div class="row">Modus<select id="optMode"><option value="vad">Stimme (empfohlen)</option><option value="words">Wörter erkennen (Test)</option><option value="fixed">Festes Tempo</option></select></div>
+    <div class="row">Sprechtempo<input type="range" id="optWps" min="15" max="40" value="24"></div>
+    <div class="row">Empfindlichkeit<input type="range" id="optSens" min="1" max="10" value="5"></div>
+    <div class="row">Sprache (Wörter)<select id="optLang"><option value="en-US">English</option><option value="de-DE">Deutsch</option></select></div>
+    <div class="row">Festes Tempo<input type="range" id="optSpeed" min="10" max="120" value="40"></div>
   </div>
-  <div class="foot">Das Mikro hört ab dem Start zu, auch ohne Aufnahme. So kannst du proben. Tippe auf ein Wort, um dorthin zu springen.</div>
+  <div class="foot">„Stimme“: Der Text rückt Wort für Wort vor, solange du sprichst, und hält an, wenn du pausierst. Sprechtempo = Wörter pro Sekunde. „Wörter erkennen“ nutzt die Spracherkennung von Safari und kann auf dem iPhone die Kamera stören. Tippe auf ein Wort, um dorthin zu springen.</div>
   <div class="cap">Darstellung</div>
   <div class="group">
     <div class="row">Schriftgröße<input type="range" id="optSize" min="18" max="48" value="26"></div>
     <div class="row">Feldhöhe<input type="range" id="optHeight" min="14" max="40" value="22"></div>
     <div class="row">Countdown<select id="optCount"><option value="0">Aus</option><option value="3">3 Sekunden</option><option value="5">5 Sekunden</option></select></div>
-    <div class="row">Rückkamera<label class="switch"><input type="checkbox" id="optBack"><span></span></label></div>
   </div>
 </div></div>
 
@@ -269,17 +274,19 @@ Now you know what he means. But not yet where the real problem is. That's the ne
 
 let scripts = store.get('scripts', null);
 if (!Array.isArray(scripts) || !scripts.length) {
-  scripts = [{ id: uid(), title: 'R01 · Efficient', portrait: store.get('textP', DEFAULT_TEXT), landscape: store.get('textL', DEFAULT_TEXT) }];
+  scripts = [{ id: uid(), title: 'R01 · Efficient', portrait: DEFAULT_TEXT, landscape: DEFAULT_TEXT }];
 }
 const state = {
   activeId: store.get('active', scripts[0].id),
   editFormat: 'portrait', format: 'portrait',
   ptr: { portrait: 0, landscape: 0 },
-  voice: store.get('voice', true), lang: store.get('lang', 'en-US'),
+  mode: store.get('mode', 'vad'), lang: store.get('lang', 'en-US'),
+  wps: store.get('wps', 24), sens: store.get('sens', 5),
   speed: store.get('speed', 40), size: store.get('size', 26), height: store.get('height', 22),
-  countdown: store.get('countSec', 3), back: store.get('back', false),
+  countdown: store.get('countSec', 3), back: false,
   stream: null, recorder: null, chunks: [], recording: false, blob: null, mime: '',
-  rec: null, recActive: false, wantVoice: false, t0: 0, timerId: 0, autoRun: false, autoId: 0, lastFrame: 0
+  rec: null, recActive: false, wantVoice: false, t0: 0, timerId: 0, autoRun: false, autoId: 0, lastFrame: 0,
+  started: false, opening: false
 };
 const active = () => scripts.find(s => s.id === state.activeId) || scripts[0];
 const saveScripts = () => { store.set('scripts', scripts); store.set('active', state.activeId); };
@@ -326,22 +333,49 @@ function renderText() {
   });
   paintPtr();
 }
-function setPtr(i) { state.ptr[state.format] = Math.max(0, Math.min(words.length, i)); paintPtr(); scrollToPtr(true); }
+function setPtr(i) { state.ptr[state.format] = Math.max(0, Math.min(words.length, i)); vad.acc = 0; paintPtr(); scrollToPtr(true); }
 function paintPtr() {
   const p = state.ptr[state.format];
   words.forEach((w, i) => { w.el.classList.toggle('done', i < p); w.el.classList.toggle('cur', i === p); });
 }
 const anchorRatio = () => state.format === 'portrait' ? 0.04 : 0.36;
+let lastScrollLine = -1;
 function scrollToPtr(smooth) {
   const sc = $('scroll');
   const p = Math.min(state.ptr[state.format], words.length - 1);
   if (p < 0 || !words[p]) return;
   const off = sc.clientHeight * anchorRatio();
-  sc.scrollTo({ top: Math.max(0, words[p].el.offsetTop - off), behavior: smooth ? 'smooth' : 'auto' });
+  const top = words[p].el.offsetTop;
+  if (smooth && top === lastScrollLine) return;   // nur bei Zeilenwechsel scrollen
+  lastScrollLine = top;
+  sc.scrollTo({ top: Math.max(0, top - off), behavior: smooth ? 'smooth' : 'auto' });
   $('marker').style.top = (off + 8) + 'px';
 }
+function advanceTo(p) {
+  p = Math.min(words.length, p);
+  if (p <= state.ptr[state.format]) return;
+  state.ptr[state.format] = p; paintPtr(); scrollToPtr(true);
+}
 
-/* ---------- Spracherkennung: Text folgt der Stimme ---------- */
+/* ---------- Modus „Stimme“: Text rückt vor, solange du sprichst ---------- */
+const vad = { floor: 0.01, speaking: false, hang: 0, acc: 0, last: 0 };
+function vadStep(rms, now) {
+  const dt = vad.last ? Math.min(0.1, (now - vad.last) / 1000) : 0;
+  vad.last = now;
+  // Grundrauschen langsam mitführen (steigt langsam, fällt schnell)
+  vad.floor = rms < vad.floor ? vad.floor * 0.9 + rms * 0.1 : vad.floor * 0.998 + rms * 0.002;
+  const factor = 1.4 + (10 - state.sens) * 0.35;          // Empfindlichkeit 10 = sehr empfindlich
+  const on = rms > Math.max(0.006, vad.floor * factor);
+  if (on) vad.hang = 0.35; else vad.hang -= dt;
+  vad.speaking = vad.hang > 0;
+  if (state.mode !== 'vad' || !state.started || $('sheetText').classList.contains('open')) return;
+  if (vad.speaking) {
+    vad.acc += dt * state.wps / 10;
+    while (vad.acc >= 1) { vad.acc -= 1; advanceTo(state.ptr[state.format] + 1); }
+  }
+}
+
+/* ---------- Modus „Wörter erkennen“ (Safari-Spracherkennung) ---------- */
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 function similar(a, b) {
   if (!a || !b) return false;
@@ -360,14 +394,13 @@ function follow(spoken) {
       const wi = p - (tail.length - 1 - k);
       if (wi >= 0 && similar(tail[k], words[wi].n)) score++;
     }
-    const need = (p - ptr) > 6 ? 3 : (p - ptr) > 2 ? 2 : 1;   // weite Sprünge brauchen mehr Treffer
+    const need = (p - ptr) > 6 ? 3 : (p - ptr) > 2 ? 2 : 1;
     if (score >= need && (score > bestScore || (score === bestScore && p < best))) { best = p; bestScore = score; }
   }
-  if (best >= 0 && best + 1 > ptr) { state.ptr[state.format] = best + 1; paintPtr(); scrollToPtr(true); }
+  if (best >= 0) advanceTo(best + 1);
 }
-function startVoice() {
-  if (!SR) { setStatus(false, 'Keine Spracherkennung'); return false; }
-  if (!state.voice) { setStatus(false, 'Mikro an · Text folgt nicht'); return false; }
+function startWords() {
+  if (!SR) { setStatus('Keine Spracherkennung'); return false; }
   if (state.recActive) return true;
   const rec = new SR();
   rec.lang = state.lang; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
@@ -376,42 +409,55 @@ function startVoice() {
     for (let i = 0; i < e.results.length; i++) t += ' ' + e.results[i][0].transcript;
     follow(t.split(/\s+/).map(norm).filter(Boolean));
   };
-  rec.onerror = e => {
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { state.wantVoice = false; setStatus(false, 'Spracherkennung nicht erlaubt'); }
-  };
+  rec.onerror = e => { if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { state.wantVoice = false; setStatus('Spracherkennung nicht erlaubt'); } };
   rec.onend = () => {
     state.recActive = false;
-    if (state.wantVoice && state.voice) { try { rec.start(); state.recActive = true; } catch { setTimeout(startVoice, 400); } }
+    if (state.wantVoice && state.mode === 'words' && !document.hidden) setTimeout(() => { if (state.wantVoice) { try { rec.start(); state.recActive = true; } catch {} } }, 600);
   };
-  try { rec.start(); state.rec = rec; state.recActive = true; state.wantVoice = true; setStatus(true, 'Hört zu'); return true; }
-  catch { setStatus(false, 'Stimme nicht verfügbar'); return false; }
+  try { rec.start(); state.rec = rec; state.recActive = true; state.wantVoice = true; return true; }
+  catch { setStatus('Spracherkennung nicht verfügbar'); return false; }
 }
-function stopVoice() { state.wantVoice = false; if (state.rec) { try { state.rec.stop(); } catch {} } state.recActive = false; }
-function restartVoice() { stopVoice(); setTimeout(() => { if (state.voice) startVoice(); else setStatus(false, 'Mikro an · Text folgt nicht'); }, 300); }
-function setStatus(live, txt) { $('status').classList.toggle('live', live); $('statusText').textContent = txt; }
+function stopWords() { state.wantVoice = false; if (state.rec) { try { state.rec.abort(); } catch {} } state.rec = null; state.recActive = false; }
+function applyMode() {
+  stopWords(); stopAuto();
+  if (state.mode === 'words' && state.started) startWords();
+  if (state.mode === 'fixed' && state.recording) startAuto();
+  updateStatus();
+}
+const MODE_LABEL = { vad: 'Stimme', words: 'Wörter', fixed: 'Festes Tempo' };
+let statusOverride = '';
+function setStatus(txt) { statusOverride = txt; updateStatus(); }
+function updateStatus() {
+  $('statusText').textContent = statusOverride || (state.stream ? MODE_LABEL[state.mode] : 'Mikro aus');
+  $('status').classList.toggle('live', !!state.stream && !statusOverride);
+}
 
-/* Pegelanzeige: zeigt, dass das Mikro Ton bekommt */
-function startMeter() {
+/* ---------- Mikro-Pegel (ein AudioContext für alles) ---------- */
+let ac = null, an = null, srcNode = null, buf = null;
+function connectMeter() {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
-    const ac = new AC();
-    const src = ac.createMediaStreamSource(state.stream);
-    const an = ac.createAnalyser(); an.fftSize = 512; src.connect(an);
-    const buf = new Uint8Array(an.fftSize);
-    const bars = [...document.querySelectorAll('#status .lv b')];
-    const loop = () => {
-      an.getByteTimeDomainData(buf);
-      let s = 0; for (const v of buf) { const d = (v - 128) / 128; s += d * d; }
-      const lvl = Math.min(1, Math.sqrt(s / buf.length) * 6);
-      bars.forEach((b, i) => { b.style.height = (4 + Math.max(0, lvl * 10 - Math.abs(i - 2) * 2)) + 'px'; });
-      requestAnimationFrame(loop);
-    };
-    loop();
+    if (!ac) { ac = new AC(); an = ac.createAnalyser(); an.fftSize = 1024; buf = new Float32Array(an.fftSize); requestAnimationFrame(meterLoop); }
+    if (srcNode) { try { srcNode.disconnect(); } catch {} }
+    if (state.stream && state.stream.getAudioTracks().length) { srcNode = ac.createMediaStreamSource(state.stream); srcNode.connect(an); }
     if (ac.state === 'suspended') ac.resume();
   } catch {}
 }
+const bars = [...document.querySelectorAll('#status .lv b')];
+function meterLoop(now) {
+  if (an && state.stream) {
+    an.getFloatTimeDomainData(buf);
+    let s = 0; for (let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+    const rms = Math.sqrt(s / buf.length);
+    vadStep(rms, now);
+    const lvl = Math.min(1, rms * 12);
+    bars.forEach((b, i) => { b.style.height = (4 + Math.max(0, lvl * 10 - Math.abs(i - 2) * 2)) + 'px'; });
+    $('status').classList.toggle('talk', vad.speaking);
+  }
+  requestAnimationFrame(meterLoop);
+}
 
-/* ---------- Automatisches Scrollen (ohne Stimme) ---------- */
+/* ---------- Festes Tempo ---------- */
 function autoScroll(ts) {
   if (!state.autoRun) return;
   const dt = state.lastFrame ? (ts - state.lastFrame) / 1000 : 0;
@@ -428,17 +474,50 @@ function startAuto() { state.autoRun = true; state.lastFrame = 0; state.autoId =
 function stopAuto() { state.autoRun = false; cancelAnimationFrame(state.autoId); }
 
 /* ---------- Kamera ---------- */
-async function openCamera() {
-  if (state.stream) state.stream.getTracks().forEach(t => t.stop());
-  state.stream = await navigator.mediaDevices.getUserMedia({
-    video: { facingMode: state.back ? 'environment' : 'user', width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
-    audio: { echoCancellation: true, noiseSuppression: true }
-  });
-  const v = $('cam');
-  v.srcObject = state.stream;
-  v.classList.toggle('back', state.back);
-  await v.play().catch(() => {});
+function releaseCamera() {
+  stopWords();
+  if (state.stream) { state.stream.getTracks().forEach(t => { t.onended = null; t.stop(); }); state.stream = null; }
+  $('cam').srcObject = null;
+  updateStatus();
 }
+async function openCamera() {
+  if (state.opening) return;
+  state.opening = true;
+  const hadWords = state.recActive;
+  stopWords();
+  if (state.stream) { state.stream.getTracks().forEach(t => { t.onended = null; t.stop(); }); state.stream = null; }
+  await new Promise(r => setTimeout(r, 150));
+  try {
+    const facing = state.back ? 'environment' : 'user';
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { exact: facing }, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 } },
+        audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true }
+      });
+    } catch {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing }, audio: true });
+    }
+    state.stream = stream;
+    const v = $('cam');
+    v.srcObject = stream;
+    v.classList.toggle('back', state.back);
+    await v.play().catch(() => {});
+    // Wenn iOS die Kamera unterbricht: neu öffnen
+    stream.getVideoTracks().forEach(t => { t.onended = () => { if (state.started && !document.hidden && !state.recording) openCamera(); }; });
+    connectMeter();
+    statusOverride = '';
+    if (hadWords || (state.mode === 'words' && state.started)) startWords();
+    updateStatus();
+  } finally { state.opening = false; }
+}
+// Kamera & Mikro freigeben, wenn die App nicht sichtbar ist (roter Punkt verschwindet)
+document.addEventListener('visibilitychange', () => {
+  if (!state.started) return;
+  if (document.hidden) { if (state.recording) stopRecording(); releaseCamera(); }
+  else openCamera().catch(() => setStatus('Kamera nicht verfügbar'));
+});
+window.addEventListener('pagehide', releaseCamera);
 
 /* ---------- Aufnahme ---------- */
 function pickMime() {
@@ -455,25 +534,23 @@ async function countdown() {
   for (let i = n; i > 0; i--) {
     num.textContent = i;
     num.style.animation = 'none'; void num.offsetWidth; num.style.animation = 'pop .35s cubic-bezier(.3,.7,.4,1)';
-    try { navigator.vibrate && navigator.vibrate(30); } catch {}
     await new Promise(r => setTimeout(r, 1000));
   }
   el.classList.remove('on');
 }
 async function startRecording() {
   if (!state.stream) return;
-  setPtr(state.ptr[state.format]);
   await countdown();
   state.mime = pickMime();
   state.chunks = [];
-  try { state.recorder = new MediaRecorder(state.stream, state.mime ? { mimeType: state.mime, videoBitsPerSecond: 8e6 } : undefined); }
+  try { state.recorder = new MediaRecorder(state.stream, state.mime ? { mimeType: state.mime, videoBitsPerSecond: 6e6 } : undefined); }
   catch { state.recorder = new MediaRecorder(state.stream); }
   state.recorder.ondataavailable = e => { if (e.data && e.data.size) state.chunks.push(e.data); };
   state.recorder.onstop = finishRecording;
   state.recorder.start(1000);
   state.recording = true;
   $('rec').classList.add('on');
-  if (!(state.voice && state.recActive)) startAuto();
+  if (state.mode === 'fixed') startAuto();
   state.t0 = Date.now();
   $('timer').classList.add('on'); tick(); state.timerId = setInterval(tick, 500);
 }
@@ -489,6 +566,7 @@ function stopRecording() {
   if (state.recorder && state.recorder.state !== 'inactive') state.recorder.stop();
 }
 function finishRecording() {
+  if (!state.chunks.length) return;
   const type = (state.mime || state.chunks[0]?.type || 'video/mp4').split(';')[0];
   state.blob = new Blob(state.chunks, { type });
   const v = $('review');
@@ -520,28 +598,25 @@ function cleanScript(raw) {
   return raw
     .replace(/\r/g, '')
     .replace(/<[^>]+>/g, ' ')
-    .replace(/\*\([^)]*\)\*/g, ' ')            // *(Regieanweisung)*
-    .replace(/`[^`]*`/g, ' ')                   // `Einblendung`
-    .replace(/\[[^\]]*\]/g, ' ')                // [Zeitmarke] / [Einblendung]
-    .replace(/^\s*>\s?/gm, '')                  // Zitat-Zeichen entfernen, Text behalten
-    .replace(/^\s*(#{1,6}\s.*|\|.*|-{3,})$/gm, '') // Überschriften, Tabellen, Trennlinien
+    .replace(/\*\([^)]*\)\*/g, ' ')
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/^\s*>\s?/gm, '')
+    .replace(/^\s*(#{1,6}\s.*|\|.*|-{3,})$/gm, '')
     .replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1').replace(/_([^_]+)_/g, '$1')
-    .replace(/^\s*(Warum so|Hinweis|Dreh|Rechte|Absage-Satz|Zur Reihe|Zum CTA)\b.*$/gm, '')  // Kommentarzeilen aus AMQ-Skripten
-    .replace(/^.*·\s*ca\.\s*\d+\s*s.*$/gm, '')                                                // Metazeile „Ziel · ca. 42 s · Ort“
+    .replace(/^\s*(Warum so|Hinweis|Dreh|Rechte|Absage-Satz|Zur Reihe|Zum CTA)\b.*$/gm, '')
+    .replace(/^.*·\s*ca\.\s*\d+\s*s.*$/gm, '')
     .replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 function parseImport(raw, fallbackTitle) {
   const t = raw.replace(/\r/g, '');
   const hm = t.match(/^#{1,3}\s*(.+)$/m);
   const title = (hm ? hm[1] : fallbackTitle || 'Importiert').replace(/[#*`]/g, '').trim().slice(0, 60);
-  const secP = t.split(/^#{1,6}\s*(?:Hochformat|Portrait)\b.*$/im);
-  const secL = t.split(/^#{1,6}\s*(?:Querformat|Landscape)\b.*$/im);
-  let portrait, landscape;
-  if (secP.length > 1 || secL.length > 1) {
-    const grab = (parts, other) => parts.length > 1 ? cleanScript(parts[1].split(other)[0]) : '';
-    portrait = grab(secP, /^#{1,6}\s*(?:Querformat|Landscape)\b.*$/im);
-    landscape = grab(secL, /^#{1,6}\s*(?:Hochformat|Portrait)\b.*$/im);
-  }
+  const reP = /^#{1,6}\s*(?:Hochformat|Portrait)\b.*$/im, reL = /^#{1,6}\s*(?:Querformat|Landscape)\b.*$/im;
+  const secP = t.split(reP), secL = t.split(reL);
+  let portrait = '', landscape = '';
+  if (secP.length > 1) portrait = cleanScript(secP[1].split(reL)[0]);
+  if (secL.length > 1) landscape = cleanScript(secL[1].split(reP)[0]);
   const all = cleanScript(t);
   return { id: uid(), title, portrait: portrait || all, landscape: landscape || portrait || all };
 }
@@ -566,36 +641,31 @@ function renderLib() {
     lib.appendChild(r);
   });
 }
-function openEditor() {
-  renderLib();
-  const s = active();
-  $('title').value = s.title || '';
-  syncSeg(); $('ta').value = s[state.editFormat] || '';
-}
-function commitEditor() {
-  const s = active();
-  s.title = $('title').value.trim() || s.title;
-  s[state.editFormat] = $('ta').value;
-  saveScripts();
-}
+function openEditor() { renderLib(); const s = active(); $('title').value = s.title || ''; syncSeg(); $('ta').value = s[state.editFormat] || ''; }
+function commitEditor() { const s = active(); s.title = $('title').value.trim() || s.title; s[state.editFormat] = $('ta').value; saveScripts(); }
 function syncSeg() { document.querySelectorAll('#segFormat button').forEach(b => b.classList.toggle('on', b.dataset.f === state.editFormat)); }
 
 /* ---------- Bedienung ---------- */
 const standalone = () => window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
 $('btnStart').onclick = async () => {
   try {
+    state.started = true;
     await openCamera();
     $('start').style.display = 'none';
     applyLayout();
-    startMeter();
-    if (!startVoice() && SR && state.voice) setStatus(false, 'Mikro an');
     if (!standalone()) $('install').classList.add('show');
   } catch (e) {
+    state.started = false;
     $('err').textContent = 'Kein Zugriff auf Kamera/Mikrofon. In den Einstellungen für Safari erlauben und neu laden. (' + (e.name || e) + ')';
   }
 };
 $('rec').onclick = () => { state.recording ? stopRecording() : startRecording(); };
-$('btnReset').onclick = () => setPtr(0);
+$('btnReset').onclick = () => { lastScrollLine = -1; setPtr(0); };
+$('btnFlip').onclick = async () => {
+  if (state.recording) return;
+  state.back = !state.back;
+  try { await openCamera(); } catch { state.back = !state.back; setStatus('Kamera nicht verfügbar'); try { await openCamera(); } catch {} }
+};
 $('btnText').onclick = () => { state.editFormat = state.format; openEditor(); $('sheetText').classList.add('open'); };
 document.querySelectorAll('#segFormat button').forEach(b => b.onclick = () => {
   commitEditor(); state.editFormat = b.dataset.f; syncSeg(); $('ta').value = active()[state.editFormat] || '';
@@ -621,40 +691,40 @@ $('file').onchange = async e => {
 $('textDone').onclick = () => {
   commitEditor();
   $('sheetText').classList.remove('open');
-  renderText(); requestAnimationFrame(() => scrollToPtr(false));
+  lastScrollLine = -1; renderText(); requestAnimationFrame(() => scrollToPtr(false));
 };
 $('sheetText').addEventListener('click', e => { if (e.target.id === 'sheetText') $('textDone').click(); });
-
 $('install').onclick = () => $('sheetInstall').classList.add('open');
 $('installDone').onclick = () => $('sheetInstall').classList.remove('open');
 $('sheetInstall').addEventListener('click', e => { if (e.target.id === 'sheetInstall') $('sheetInstall').classList.remove('open'); });
 
 const css = (k, v) => document.documentElement.style.setProperty(k, v);
-$('optVoice').checked = state.voice;
-$('optVoice').onchange = e => { state.voice = e.target.checked; store.set('voice', state.voice); if (state.stream) restartVoice(); };
+$('optMode').value = state.mode;
+$('optMode').onchange = e => { state.mode = e.target.value; store.set('mode', state.mode); statusOverride = ''; applyMode(); };
+$('optWps').value = state.wps;
+$('optWps').oninput = e => { state.wps = +e.target.value; store.set('wps', state.wps); };
+$('optSens').value = state.sens;
+$('optSens').oninput = e => { state.sens = +e.target.value; store.set('sens', state.sens); };
 $('optLang').value = state.lang;
-$('optLang').onchange = e => { state.lang = e.target.value; store.set('lang', state.lang); if (state.stream) restartVoice(); };
+$('optLang').onchange = e => { state.lang = e.target.value; store.set('lang', state.lang); applyMode(); };
 $('optSpeed').value = state.speed;
 $('optSpeed').oninput = e => { state.speed = +e.target.value; store.set('speed', state.speed); };
 $('optSize').value = state.size; css('--fs', state.size + 'px');
-$('optSize').oninput = e => { state.size = +e.target.value; store.set('size', state.size); css('--fs', state.size + 'px'); scrollToPtr(false); };
+$('optSize').oninput = e => { state.size = +e.target.value; store.set('size', state.size); css('--fs', state.size + 'px'); lastScrollLine = -1; scrollToPtr(false); };
 $('optHeight').value = state.height; css('--ph', state.height + 'vh');
-$('optHeight').oninput = e => { state.height = +e.target.value; store.set('height', state.height); css('--ph', state.height + 'vh'); scrollToPtr(false); };
+$('optHeight').oninput = e => { state.height = +e.target.value; store.set('height', state.height); css('--ph', state.height + 'vh'); lastScrollLine = -1; scrollToPtr(false); };
 $('optCount').value = String(state.countdown);
 $('optCount').onchange = e => { state.countdown = +e.target.value; store.set('countSec', state.countdown); };
-$('optBack').checked = state.back;
-$('optBack').onchange = async e => { state.back = e.target.checked; store.set('back', state.back); if (state.stream && !state.recording) { try { await openCamera(); } catch {} } };
 
 $('btnSave').onclick = saveToPhotos;
 $('btnDownload').onclick = download;
 $('btnDiscard').onclick = () => { $('sheetDone').classList.remove('open'); state.blob = null; };
 $('sheetDone').addEventListener('click', e => { if (e.target.id === 'sheetDone') $('sheetDone').classList.remove('open'); });
-$('scroll').addEventListener('dblclick', () => { if (!state.recording || state.recActive) return; state.autoRun ? stopAuto() : startAuto(); });
 
 saveScripts();
-if (!SR) setStatus(false, 'Keine Spracherkennung');
 renderText();
 applyLayout();
+updateStatus();
 })();
 </script>
 </body>
